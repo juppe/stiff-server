@@ -1,43 +1,34 @@
-import { config, DynamoDB } from 'aws-sdk'
+import moment from 'moment'
+import Redis from 'ioredis'
 
-config.update({
-  region: 'eu-north-1',
-  endpoint: 'http://localhost:8000'
-})
+const redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379'
+const redis = new Redis(redis_address)
 
-const dynDb = new DynamoDB.DocumentClient()
+const getUsers = async () => {
+  try {
+    const data = await redis.hgetall('Users')
+    const users = Object.keys(data).map(key => JSON.parse(data[key]))
+    return users
+  } catch (error) {
+    console.log('Error fetching Users:', JSON.stringify(error, null, 2))
+  }
+}
 
 const createUser = async (username, fullname) => {
-  var params = {
-    TableName: 'Users',
-    Item: {
-      username: username,
-      fullname: fullname
-    }
+  const member = {
+    username: username,
+    fullname: fullname
   }
 
   try {
-    const data = await dynDb.put(params).promise()
+    const data = await redis.hset('Users', username, JSON.stringify(member))
     return data
   } catch (error) {
     console.error('Unable to add user:', JSON.stringify(error, null, 2))
   }
 }
 
-const getUsers = async () => {
-  var params = {
-    TableName: 'Users'
-  }
-
-  try {
-    const data = await dynDb.scan(params).promise()
-    return data.Items
-  } catch (error) {
-    console.log('Error fetching items:', JSON.stringify(error, null, 2))
-  }
-}
-
 export const users = {
-  createUser,
-  getUsers
+  getUsers,
+  createUser
 }
