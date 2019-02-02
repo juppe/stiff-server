@@ -1,20 +1,21 @@
-var express = require("express");
-var router = express.Router();
+import { Router } from 'express'
+var router = Router()
 
-const { createUser, getUsers } = require("../actions").users;
+import { users } from '../actions'
+const { createUser, getUsers } = users
 
 /* GET users */
-router.get("/", function(req, res) {
+router.get('/', function(req, res) {
   getUsers().then(users => {
-    res.send(users);
-  });
-});
+    res.send(users)
+  })
+})
 
 /* CREATE user */
-router.post("/", function(req, res) {
+router.post('/', function(req, res) {
   createUser(req.body.username, req.body.fullname).then(result => {
-    res.send({ response: "User created!" });
-  });
-});
+    res.send({ response: 'User created!' })
+  })
+})
 
-module.exports = router;
+export default router

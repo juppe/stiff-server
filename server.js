@@ -1,20 +1,17 @@
-var express = require("express");
-var bodyParser = require("body-parser");
-const socketIO = require("socket.io");
+import express from 'express'
+import socketIO from 'socket.io'
 
-var app = express();
+const app = express()
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
-server = app.listen(process.env.PORT || 3001);
-app.io = socketIO(server);
+const server = app.listen(process.env.PORT || 3001)
+app.io = socketIO(server)
 
-/* Routes to REST API and Websockets endpoints */
-var routes = require("./routes")(app.io);
+/* Routes to REST API and Socket.IO/Websockets endpoints */
+const routes = require('./routes').default(app.io)
 
-app.use("/", routes);
+app.use('/', routes)
 
-module.exports = app;
+export default app

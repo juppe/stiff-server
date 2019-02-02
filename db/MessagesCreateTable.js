@@ -1,38 +1,38 @@
-var AWS = require("aws-sdk");
+import { config, DynamoDB } from 'aws-sdk'
 
-AWS.config.update({
-  region: "eu-north-1",
-  endpoint: "http://localhost:8000"
-});
+config.update({
+  region: 'eu-north-1',
+  endpoint: 'http://localhost:8000'
+})
 
-var dynamodb = new AWS.DynamoDB();
+var dynamodb = new DynamoDB()
 
 var params = {
-  TableName: "Messages",
+  TableName: 'Messages',
   KeySchema: [
-    { AttributeName: "username", KeyType: "HASH" },
-    { AttributeName: "message", KeyType: "RANGE" }
+    { AttributeName: 'username', KeyType: 'HASH' },
+    { AttributeName: 'message', KeyType: 'RANGE' }
   ],
   AttributeDefinitions: [
-    { AttributeName: "username", AttributeType: "S" },
-    { AttributeName: "message", AttributeType: "S" }
+    { AttributeName: 'username', AttributeType: 'S' },
+    { AttributeName: 'message', AttributeType: 'S' }
   ],
   ProvisionedThroughput: {
     ReadCapacityUnits: 10,
     WriteCapacityUnits: 10
   }
-};
+}
 
 dynamodb.createTable(params, function(err, data) {
   if (err) {
     console.error(
-      "Unable to create table. Error JSON:",
+      'Unable to create table. Error JSON:',
       JSON.stringify(err, null, 2)
-    );
+    )
   } else {
     console.log(
-      "Created table. Table description JSON:",
+      'Created table. Table description JSON:',
       JSON.stringify(data, null, 2)
-    );
+    )
   }
-});
+})

@@ -1,15 +1,12 @@
-/* GET Hello message. */
-function hello() {
-  var text = "";
-  var possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+import moment from 'moment'
 
-  for (var i = 0; i < 5; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-  return text;
+/* Hello message. */
+const helloMessage = () => {
+  const date = moment.now()
+  const msg = `Hello the time is: ${date}`
+  return msg
 }
 
-module.exports = {
-  hello
-};
+export const hello = {
+  helloMessage
+}

@@ -1,13 +1,14 @@
-const express = require("express");
-const router = express.Router();
+import { Router } from 'express'
+const router = Router()
 
-const { getMessages } = require("../actions").messages;
+import { messages } from '../actions'
+const { getMessages } = messages
 
 /* GET messages */
-router.get("/", function(req, res) {
+router.get('/', function(req, res) {
   getMessages().then(messages => {
-    res.send(messages);
-  });
-});
+    res.send(messages)
+  })
+})
 
-module.exports = router;
+export default router
