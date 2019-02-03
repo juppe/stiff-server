@@ -1,14 +1,15 @@
 import { Router } from 'express'
+
 const router = Router()
 
-import { hello } from '../actions'
-const { helloMessage } = hello
+import { hello as hello_action } from '../actions'
+const { helloMessage } = hello_action
 
-router.get('/', function(req, res) {
+router.get('/', (req, res) => {
   const response = helloMessage()
   res.send({
     response: response
   })
 })
 
-export default router
+export const hello = router

@@ -1,14 +1,16 @@
 import { Router } from 'express'
+import { requireAuth } from '../auth'
+
 const router = Router()
 
-import { messages } from '../actions'
-const { getMessages } = messages
+import { messages as messages_action } from '../actions'
+const { listMessages } = messages_action
 
 /* GET messages */
-router.get('/', function(req, res) {
-  getMessages().then(messages => {
+router.get('/', requireAuth(), (req, res) => {
+  listMessages().then(messages => {
     res.send(messages)
   })
 })
 
-export default router
+export const messages = router
