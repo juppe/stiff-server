@@ -1,28 +1,35 @@
-import moment from 'moment'
 import Redis from 'ioredis'
 
 const redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379'
 const redis = new Redis(redis_address)
 
-const listMessages = async () => {
+const redisKeyPrefix = 'stiff:messages:'
+
+const listMessages = async msgRoom => {
+  const redisKey = redisKeyPrefix + msgRoom
+
   try {
-    const data = await redis.zrange('messages', 0, 2549099538343)
+    const data = await redis.lrange(redisKey, 0, -1)
     const messages = data.map(m => JSON.parse(m))
+
+    console.log(messages)
     return messages
   } catch (error) {
     console.log('Error fetching messages:', JSON.stringify(error, null, 2))
   }
 }
 
-const writeMessage = async message => {
-  const date = moment.now()
+const writeMessage = async (msgRoom, msgUser, msgDate, msgMessage) => {
+  const redisKey = redisKeyPrefix + msgRoom
+
   const data = JSON.stringify({
-    date: date,
-    message: message
+    date: msgDate,
+    user: msgUser,
+    message: msgMessage
   })
   console.log('write_message')
   try {
-    await redis.zadd('messages', date, data)
+    await redis.rpush(redisKey, data)
   } catch (error) {
     console.log('Error writing message:', JSON.stringify(error, null, 2))
   }
