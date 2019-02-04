@@ -15,14 +15,11 @@ router.get('/', requireAuth(), (req, res) => {
 
 /* CREATE user */
 router.post('/', (req, res) => {
-  const data = {
-    email: req.body.email,
-    nickname: req.body.nickname,
-    password: req.body.password
-  }
-  createUser(data).then(result => {
-    res.send({ response: result })
-  })
+  createUser(req.body.username, req.body.nickname, req.body.password).then(
+    result => {
+      res.send({ response: result })
+    }
+  )
 })
 
 export const users = router

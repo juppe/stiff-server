@@ -10,7 +10,7 @@ import { messages } from './messages'
 
 const app = express()
 
-app.get('/', function(req, res) {
+app.get('/', (req, res) => {
   res.json({ msg: "I'm alive!" })
 })
 

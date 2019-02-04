@@ -5,58 +5,38 @@ import { Strategy as LocalStrategy } from 'passport-local'
 import { users as users_action } from '../actions'
 const { getUser } = users_action
 
-const findUser = async (email, callback) => {
+const findByUsername = async (username, done) => {
   // Check for user in DB
-  const user = await getUser(email)
-
-  if (user && email === user.email) {
-    return callback(null, user)
+  const user = await getUser(username)
+  if (user) {
+    return done(null, user)
   }
-  return callback(null, 'User not found')
+  done(null, false)
 }
 
-passport.serializeUser((user, cb) => {
-  cb(null, user.email)
+passport.serializeUser((user, done) => {
+  done(null, user.username)
 })
 
-passport.deserializeUser((email, cb) => {
-  findUser(email, cb)
+passport.deserializeUser((username, done) => {
+  findByUsername(username, done)
 })
 
 export const initAuth = () => {
   passport.use(
-    new LocalStrategy(
-      {
-        usernameField: 'email',
-        passwordField: 'password'
-      },
-      (email, password, done) => {
-        findUser(email, (err, user) => {
-          if (err) {
-            return done(err)
+    new LocalStrategy((username, password, done) => {
+      findByUsername(username, (err, user) => {
+        if (err || !user.username) {
+          return done(err, false)
+        }
+
+        compare(password, user.password, (err, isValid) => {
+          if (err || !isValid) {
+            return done(err, false)
           }
-
-          // User not found
-          if (!user) {
-            console.log('User not found')
-            return done(null, false)
-          }
-
-          return done(null, user)
-
-          compare(password, user.password, (err, isValid) => {
-            if (err) {
-              return done(err)
-            }
-            if (!isValid) {
-              return done(null, false)
-            }
-
-            console.log('Valid user found')
-            return done(null, user)
-          })
+          done(null, user)
         })
-      }
-    )
+      })
+    })
   )
 }
