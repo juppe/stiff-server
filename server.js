@@ -16,14 +16,15 @@ const redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379'
 const redis = new Redis(redis_address)
 const RedisStore = ConnectRedis(session)
 
-app.use(
-  session({
-    store: new RedisStore({ client: redis }),
-    secret: 'iso siika karva hauki',
-    resave: false,
-    saveUninitialized: true
-  })
-)
+const sessionMiddleware = session({
+  store: new RedisStore({ client: redis }),
+  name: 'stiff_session_id',
+  secret: 'iso siika karva hauki',
+  resave: false,
+  saveUninitialized: true
+})
+
+app.use(sessionMiddleware)
 
 /* Initialize Passport authentication */
 import { initAuth } from './auth'
@@ -37,6 +38,12 @@ app.use('/', routes)
 
 /* Handle Redis pubsub / Socket-io events */
 const io = socketIO(server)
+
+// Session handling for our sockets
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, {}, next)
+})
+
 import { events } from './events'
 events(io)
 
