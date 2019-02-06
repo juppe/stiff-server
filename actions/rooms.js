@@ -5,7 +5,7 @@ const redis = new Redis(redis_address)
 
 const listRooms = async () => {
   try {
-    const data = await redis.hgetall('Rooms')
+    const data = await redis.hgetall('stiff:rooms')
     const rooms = Object.keys(data).map(key => JSON.parse(data[key]))
     return rooms
   } catch (error) {
@@ -15,20 +15,34 @@ const listRooms = async () => {
 
 const createRoom = async name => {
   try {
-    const data = await redis.hset('Rooms', name, JSON.stringify(name))
-    return data
+    await redis.hset('stiff:rooms', name, JSON.stringify(name))
   } catch (error) {
     console.error('Unable to add room:', JSON.stringify(error, null, 2))
   }
 }
 
-const joinRoom = async () => {
+const joinRoom = async (room, username, socketid) => {
+  try {
+    const rediskey = 'stiff:members:'+room
+    await redis.hset(rediskey, username, socketid)
+  } catch (error) {
+    console.error(
+      'Unable to add member to room:',
+      JSON.stringify(error, null, 2)
+    )
+  }
 }
 
-const leaveRoom = async () => {
-}
+const leaveRoom = async () => {}
 
-const getRoomUsers = async () => {
+const getRoomMembers = async (room) => {
+  try {
+    const rediskey = 'stiff:members:'+room
+    const data = await redis.hgetall(rediskey)
+    return data
+  } catch (error) {
+    console.log('Error fetching room members:', JSON.stringify(error, null, 2))
+  }
 }
 
 export const rooms = {
@@ -36,5 +50,5 @@ export const rooms = {
   createRoom,
   joinRoom,
   leaveRoom,
-  getRoomUsers
+  getRoomMembers
 }
