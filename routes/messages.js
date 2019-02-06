@@ -1,15 +1,32 @@
 import { Router } from 'express'
+import Redis from 'ioredis'
 import { requireAuth } from '../auth'
+import { messages as messages_action } from '../actions'
+
+const redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379'
+const { listMessages, writeMessage } = messages_action
 
 const router = Router()
-
-import { messages as messages_action } from '../actions'
-const { listMessages } = messages_action
+const pub = new Redis(redis_address)
 
 /* GET messages */
 router.get('/', requireAuth(), (req, res) => {
   listMessages().then(messages => {
     res.send(messages)
+  })
+})
+
+/* POST message */
+router.post('/', requireAuth(), (req, res) => {
+  const msgRoom = req.body.room
+  const msgUser = req.session.passport.user
+  const msgDate = req.body.date
+  const msgMessage = req.body.message
+
+  /* Write message to database and publish it */
+  writeMessage(msgRoom, msgUser, msgDate, msgMessage).then(message => {
+    pub.publish('new_chat', JSON.stringify(message))
+    res.send({ response: 'Message stored!' })
   })
 })
 
