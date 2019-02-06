@@ -10,18 +10,16 @@ const router = Router()
 const pub = new Redis(redis_address)
 
 /* GET rooms */
-router.get('/', requireAuth(), (req, res) => {
-  listRooms().then(rooms => {
-    res.send(rooms)
-  })
+router.get('/', requireAuth(), async (req, res) => {
+  const rooms = await listRooms()
+  res.send(rooms)
 })
 
 /* CREATE room */
-router.post('/', requireAuth(), (req, res) => {
-  createRoom(req.body.roomname).then(result => {
-    pub.publish('new_room', req.body.roomname)
-    res.send({ response: 'Room created!' })
-  })
+router.post('/', requireAuth(), async (req, res) => {
+  await createRoom(req.body.roomname)
+  await pub.publish('new_room', req.body.roomname)
+  res.send({ response: 'Room created!' })
 })
 
 export const rooms = router

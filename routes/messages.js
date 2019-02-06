@@ -10,24 +10,22 @@ const router = Router()
 const pub = new Redis(redis_address)
 
 /* GET messages */
-router.get('/', requireAuth(), (req, res) => {
-  listMessages().then(messages => {
-    res.send(messages)
-  })
+router.get('/', requireAuth(), async (req, res) => {
+  const messages = await listMessages()
+  res.send(messages)
 })
 
 /* POST message */
-router.post('/', requireAuth(), (req, res) => {
+router.post('/', requireAuth(), async (req, res) => {
   const msgRoom = req.body.room
   const msgUser = req.session.passport.user
   const msgDate = req.body.date
   const msgMessage = req.body.message
 
   /* Write message to database and publish it */
-  writeMessage(msgRoom, msgUser, msgDate, msgMessage).then(message => {
-    pub.publish('new_chat', JSON.stringify(message))
-    res.send({ response: 'Message stored!' })
-  })
+  const message = await writeMessage(msgRoom, msgUser, msgDate, msgMessage)
+  await pub.publish('new_chat', JSON.stringify(message))
+  res.send({ response: 'Message stored!' })
 })
 
 export const messages = router
