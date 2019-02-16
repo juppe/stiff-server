@@ -8,7 +8,14 @@ const redis = new Redis(redis_address)
 const listUsers = async () => {
   try {
     const data = await redis.hgetall('stiff:users')
-    const users = Object.keys(data).map(key => JSON.parse(data[key]))
+    const users = Object.keys(data).map(key => {
+      var dt = JSON.parse(data[key])
+      return {
+        username: dt.username,
+        nickname: dt.nickname
+      }
+    })
+
     return users
   } catch (error) {
     console.log('Error fetching Users:', JSON.stringify(error, null, 2))
