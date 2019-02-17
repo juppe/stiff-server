@@ -1,35 +1,20 @@
 import { Router } from 'express'
 import { requireAuth } from '../auth'
-import passport from 'passport'
+
+import { login as login_action } from '../actions'
+const { loginHandler } = login_action
 
 var router = Router()
 
 /* Check if we are logged in */
 router.get('/', requireAuth(), (req, res) => {
-  res.status(200).json({
-    status: 'Login successful!'
+  res.json({
+    status: 'OK',
+    message: 'Login successful!'
   })
 })
 
 /* Login user */
-router.post('/', (req, res, next) => {
-  passport.authenticate('local', (err, user) => {
-    if (err || !user) {
-      return res.status(401).json({
-        status: 'Login unsuccessful!'
-      })
-    }
-    req.login(user, err => {
-      if (err) {
-        return res.status(401).json({
-          status: 'Login unsuccessful!'
-        })
-      }
-      res.status(200).json({
-        status: 'Login successful!'
-      })
-    })
-  })(req, res, next)
-})
+router.post('/', loginHandler)
 
 export const login = router
