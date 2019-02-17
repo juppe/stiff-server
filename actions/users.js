@@ -43,6 +43,15 @@ const getUserByUUID = async uuid => {
 }
 
 const createUser = async (username, nickname, password) => {
+  const userName = JSON.stringify(username)
+
+  // Check if user already exists
+  const exists = await redis.hexists('stiff:users', userName)
+
+  if (exists === 1) {
+    return { status: 'ERROR', message: 'User exists' }
+  }
+
   /* Create password hash */
   const password_hash = bcrypt.hashSync(password, 10)
   const uuid = uuidv4()
@@ -59,8 +68,14 @@ const createUser = async (username, nickname, password) => {
       redis.hset('stiff:uuid', uuid, username),
       redis.hset('stiff:users', username, userinfo)
     ])
+
+    return { status: 'OK', message: 'User created' }
   } catch (error) {
-    console.error('Unable to add user:', JSON.stringify(error, null, 2))
+    console.error('Error creating user:', JSON.stringify(error, null, 2))
+    return {
+      status: 'ERROR',
+      message: 'Error creating user: ' + JSON.stringify(error)
+    }
   }
 }
 
