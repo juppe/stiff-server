@@ -14,16 +14,33 @@ const listRooms = async () => {
 }
 
 const createRoom = async name => {
+  const roomName = JSON.stringify(name)
   try {
-    await redis.hset('stiff:rooms', name, JSON.stringify(name))
+    // Check if room exists
+    const exists = await redis.hexists('stiff:rooms', roomName)
+
+    if (exists === 1) {
+      return { status: 'ERROR', message: 'Room exists' }
+    }
+    // Create room
+    const response = await redis.hset('stiff:rooms', roomName, roomName)
+
+    if (response === 1) {
+      return { status: 'OK', message: 'Room created' }
+    }
+    return { status: 'ERROR', message: 'Error creating room' }
   } catch (error) {
-    console.error('Unable to add room:', JSON.stringify(error, null, 2))
+    console.error('Error creating user:', JSON.stringify(error, null, 2))
+    return {
+      status: 'ERROR',
+      message: 'Error creating room: ' + JSON.stringify(error)
+    }
   }
 }
 
 const joinRoom = async (room, username, socketid) => {
   try {
-    const rediskey = 'stiff:members:'+room
+    const rediskey = 'stiff:members:' + room
     await redis.hset(rediskey, username, socketid)
   } catch (error) {
     console.error(
@@ -35,9 +52,9 @@ const joinRoom = async (room, username, socketid) => {
 
 const leaveRoom = async () => {}
 
-const getRoomMembers = async (room) => {
+const getRoomMembers = async room => {
   try {
-    const rediskey = 'stiff:members:'+room
+    const rediskey = 'stiff:members:' + room
     const data = await redis.hgetall(rediskey)
     return data
   } catch (error) {

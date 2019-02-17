@@ -17,9 +17,12 @@ router.get('/', requireAuth(), async (req, res) => {
 
 /* CREATE room */
 router.post('/', requireAuth(), async (req, res) => {
-  await createRoom(req.body.roomname)
-  await pub.publish('new_room', JSON.stringify(req.body.roomname))
-  res.send({ response: 'Room created!' })
+  const response = await createRoom(req.body.roomname)
+
+  if (response.status === 'OK') {
+    await pub.publish('new_room', JSON.stringify(req.body.roomname))
+  }
+  res.send(response)
 })
 
 export const rooms = router
