@@ -5,6 +5,7 @@ import uuidv4 from 'uuid/v4'
 const redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379'
 const redis = new Redis(redis_address)
 
+// List all users (username and nickname)
 const listUsers = async () => {
   try {
     const data = await redis.hgetall('stiff:users')
@@ -22,6 +23,7 @@ const listUsers = async () => {
   }
 }
 
+// Get user by username
 const getUser = async username => {
   try {
     const data = await redis.hget('stiff:users', username)
@@ -32,6 +34,7 @@ const getUser = async username => {
   }
 }
 
+// Get user by UUID
 const getUserByUUID = async uuid => {
   try {
     const username = await redis.hget('stiff:uuid', uuid)
@@ -42,6 +45,7 @@ const getUserByUUID = async uuid => {
   }
 }
 
+// Create new user
 const createUser = async (username, nickname, password) => {
   const userName = JSON.stringify(username)
 
@@ -52,7 +56,7 @@ const createUser = async (username, nickname, password) => {
     return { status: 'ERROR', message: 'User exists' }
   }
 
-  /* Create password hash */
+  // Create password hash
   const password_hash = bcrypt.hashSync(password, 10)
   const uuid = uuidv4()
 

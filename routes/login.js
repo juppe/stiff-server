@@ -6,15 +6,15 @@ const { loginHandler } = login_action
 
 var router = Router()
 
-/* Check if we are logged in */
+// Check if we are logged in
 router.get('/', requireAuth(), (req, res) => {
   res.json({
     status: 'OK',
-    message: 'Login successful!'
+    message: 'You are logged in!'
   })
 })
 
-/* Login user */
+// Login user
 router.post('/', loginHandler)
 
 export const login = router

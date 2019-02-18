@@ -11,13 +11,13 @@ const { loginHandler } = login_action
 const router = Router()
 const pub = new Redis(redis_address)
 
-/* GET users */
+// GET users
 router.get('/', requireAuth(), async (req, res) => {
   const users = await listUsers()
   res.send(users)
 })
 
-/* CREATE user */
+// POST user
 router.post('/', async (req, res, next) => {
   const response = await createUser(
     req.body.username,

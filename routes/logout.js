@@ -3,7 +3,7 @@ import { requireAuth } from '../auth'
 
 var router = Router()
 
-/* Logout user */
+// Logout user
 router.get('/', requireAuth(), (req, res) => {
   console.log('LOGOUT. Bye bye!')
   req.logout()

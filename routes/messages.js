@@ -9,20 +9,20 @@ const { listMessages, writeMessage } = messages_action
 const router = Router()
 const pub = new Redis(redis_address)
 
-/* GET messages */
+// GET messages
 router.get('/', requireAuth(), async (req, res) => {
   const messages = await listMessages()
   res.send(messages)
 })
 
-/* POST message */
+// POST message
 router.post('/', requireAuth(), async (req, res) => {
   const msgRoom = req.body.room
   const msgUser = req.session.passport.user
   const msgDate = req.body.date
   const msgMessage = req.body.message
 
-  /* Write message to database and publish it */
+  // Write message to database and publish
   const message = await writeMessage(msgRoom, msgUser, msgDate, msgMessage)
   await pub.publish('new_chat', JSON.stringify(message))
   res.send({ response: 'Message stored!' })

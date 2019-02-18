@@ -9,14 +9,15 @@ const { listRooms, createRoom } = rooms_action
 const router = Router()
 const pub = new Redis(redis_address)
 
-/* GET rooms */
+// GET rooms
 router.get('/', requireAuth(), async (req, res) => {
   const rooms = await listRooms()
   res.send(rooms)
 })
 
-/* CREATE room */
+// POST room
 router.post('/', requireAuth(), async (req, res) => {
+  // Write room to database and publish
   const response = await createRoom(req.body.roomname)
 
   if (response.status === 'OK') {

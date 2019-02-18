@@ -11,11 +11,12 @@ const server = app.listen(process.env.PORT || 3001)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-/* Initialize Session handling */
+// Redis connection
 const redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379'
 const redis = new Redis(redis_address)
 const RedisStore = ConnectRedis(session)
 
+// Initialize Session handling
 const sessionMiddleware = session({
   store: new RedisStore({ client: redis }),
   name: 'stiff_session_id',
@@ -26,17 +27,17 @@ const sessionMiddleware = session({
 
 app.use(sessionMiddleware)
 
-/* Initialize Passport authentication */
+// Initialize Passport authentication
 import { initAuth } from './auth'
 app.use(passport.initialize())
 app.use(passport.session())
 initAuth(app)
 
-/* Handle REST API routes */
+// REST API routes
 import { routes } from './routes'
 app.use('/', routes)
 
-/* Handle Redis pubsub / Socket-io events */
+// Redis pub/sub & Socket.IO events
 const io = socketIO(server)
 
 // Session handling for our sockets

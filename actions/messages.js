@@ -7,6 +7,7 @@ const redis = new Redis(redis_address)
 const { getUser, getUserByUUID } = users_action
 const redisKeyPrefix = 'stiff:messages:'
 
+// List all messages in room
 const listMessages = async msgRoom => {
   const redisKey = redisKeyPrefix + msgRoom
 
@@ -31,6 +32,7 @@ const listMessages = async msgRoom => {
   }
 }
 
+// Add new message in room
 const writeMessage = async (msgRoom, msgUser, msgDate, msgMessage) => {
   const redisKey = redisKeyPrefix + msgRoom
   const user = await getUser(msgUser)

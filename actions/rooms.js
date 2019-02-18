@@ -3,6 +3,7 @@ import Redis from 'ioredis'
 const redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379'
 const redis = new Redis(redis_address)
 
+// List all rooms
 const listRooms = async () => {
   try {
     const data = await redis.hgetall('stiff:rooms')
@@ -13,6 +14,7 @@ const listRooms = async () => {
   }
 }
 
+// Create new room
 const createRoom = async name => {
   const roomName = JSON.stringify(name)
   try {
@@ -38,6 +40,7 @@ const createRoom = async name => {
   }
 }
 
+// Join room
 const joinRoom = async (room, username, socketid) => {
   try {
     const rediskey = 'stiff:members:' + room
@@ -50,8 +53,12 @@ const joinRoom = async (room, username, socketid) => {
   }
 }
 
-const leaveRoom = async () => {}
+// Leave room
+const leaveRoom = async () => {
+  /* Not omplemented yet... */
+}
 
+// List all room members
 const getRoomMembers = async room => {
   try {
     const rediskey = 'stiff:members:' + room

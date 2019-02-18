@@ -1,5 +1,6 @@
 import passport from 'passport'
 
+// Login handler for passport authentication
 const loginHandler = (req, res, next) => {
   passport.authenticate('local', (err, user) => {
     if (err || !user) {

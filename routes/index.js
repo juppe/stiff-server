@@ -1,7 +1,6 @@
 import express from 'express'
 
-/* Import routes */
-import { hello } from './hello'
+// Import routes
 import { users } from './users'
 import { rooms } from './rooms'
 import { login } from './login'
@@ -14,7 +13,6 @@ app.get('/', (req, res) => {
   res.json({ msg: "I'm alive!" })
 })
 
-app.use('/api/hello', hello)
 app.use('/api/users', users)
 app.use('/api/rooms', rooms)
 app.use('/api/login', login)
