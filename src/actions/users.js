@@ -1,12 +1,11 @@
-import Redis from 'ioredis'
 import bcrypt from 'bcrypt'
 import uuidv4 from 'uuid/v4'
+import { connectRedis } from './redis'
 
-const redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379'
-const redis = new Redis(redis_address)
+const redis = connectRedis()
 
 // List all users (username and nickname)
-const listUsers = async () => {
+export const listUsers = async () => {
   try {
     const data = await redis.hgetall('stiff:users')
     const users = Object.keys(data).map(key => {
@@ -24,7 +23,7 @@ const listUsers = async () => {
 }
 
 // Get user by username
-const getUser = async username => {
+export const getUser = async username => {
   try {
     const data = await redis.hget('stiff:users', username)
     const user = JSON.parse(data)
@@ -35,7 +34,7 @@ const getUser = async username => {
 }
 
 // Get user by UUID
-const getUserByUUID = async uuid => {
+export const getUserByUUID = async uuid => {
   try {
     const username = await redis.hget('stiff:uuid', uuid)
     const user = await getUser(username)
@@ -46,7 +45,7 @@ const getUserByUUID = async uuid => {
 }
 
 // Create new user
-const createUser = async (username, nickname, password) => {
+export const createUser = async (username, nickname, password) => {
   const userName = JSON.stringify(username)
 
   // Check if user already exists
@@ -81,11 +80,4 @@ const createUser = async (username, nickname, password) => {
       message: 'Error creating user: ' + JSON.stringify(error)
     }
   }
-}
-
-export const users = {
-  getUser,
-  getUserByUUID,
-  listUsers,
-  createUser
 }

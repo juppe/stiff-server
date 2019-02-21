@@ -1,9 +1,7 @@
 import passport from 'passport'
 import { compare } from 'bcrypt'
-import { Strategy as LocalStrategy } from 'passport-local'
-
-import { users as users_action } from '../actions'
-const { getUser } = users_action
+import { Strategy } from 'passport-local'
+import { getUser } from '../actions/users'
 
 const findByUsername = async (username, done) => {
   // Check for user in DB
@@ -24,7 +22,7 @@ passport.deserializeUser((username, done) => {
 
 export const initAuth = () => {
   passport.use(
-    new LocalStrategy((username, password, done) => {
+    new Strategy((username, password, done) => {
       findByUsername(username, (err, user) => {
         if (err || !user.username) {
           return done(err, false)

@@ -1,18 +1,11 @@
-import Redis from 'ioredis'
+import { listMessages } from '../actions/messages'
+import { listRooms, joinRoom } from '../actions/rooms'
+import { listUsers } from '../actions/users'
+import { connectRedis } from '../actions/redis'
 
-import { messages as messages_action } from '../actions'
-const { listMessages } = messages_action
-
-import { rooms as rooms_action } from '../actions'
-const { listRooms, joinRoom } = rooms_action
-
-import { users as users_action } from '../actions'
-const { listUsers } = users_action
-
-const redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379'
-const sub = new Redis(redis_address)
 // Subscribe to Redis pub/sub channels
-sub.subscribe('new_chat', 'new_room', 'new_user')
+const redis = connectRedis()
+redis.subscribe('new_chat', 'new_room', 'new_user')
 
 export const events = io => {
   // Socket.IO
@@ -55,7 +48,7 @@ export const events = io => {
 
   // Emit message to clients when someone publishes
   // to any of our subscribed channels
-  sub.on('message', async (channel, message) => {
+  redis.on('message', async (channel, message) => {
     var mess = JSON.parse(message)
     if (channel == 'new_chat') {
       // Chat messages are emitted only to specific room

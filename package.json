@@ -2,9 +2,9 @@
   "name": "stiff-server",
   "version": "0.0.2",
   "private": true,
-  "main": "server.js",
+  "main": "src/App.js",
   "scripts": {
-    "start": "nodemon --exec babel-node server.js",
+    "start": "nodemon --exec babel-node src/App.js",
     "format": "prettier --config package.json '**.{js,css}' --write"
   },
   "dependencies": {

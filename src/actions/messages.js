@@ -1,14 +1,11 @@
-import Redis from 'ioredis'
-import { users as users_action } from '../actions'
+import { getUser, getUserByUUID } from './users'
+import { connectRedis } from './redis'
 
-const redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379'
-const redis = new Redis(redis_address)
-
-const { getUser, getUserByUUID } = users_action
+const redis = connectRedis()
 const redisKeyPrefix = 'stiff:messages:'
 
 // List all messages in room
-const listMessages = async msgRoom => {
+export const listMessages = async msgRoom => {
   const redisKey = redisKeyPrefix + msgRoom
 
   try {
@@ -33,7 +30,7 @@ const listMessages = async msgRoom => {
 }
 
 // Add new message in room
-const writeMessage = async (msgRoom, msgUser, msgDate, msgMessage) => {
+export const writeMessage = async (msgRoom, msgUser, msgDate, msgMessage) => {
   const redisKey = redisKeyPrefix + msgRoom
   const user = await getUser(msgUser)
 
@@ -42,6 +39,7 @@ const writeMessage = async (msgRoom, msgUser, msgDate, msgMessage) => {
     uuid: user.uuid,
     message: msgMessage
   })
+
   try {
     await redis.rpush(redisKey, data)
     return {
@@ -54,9 +52,4 @@ const writeMessage = async (msgRoom, msgUser, msgDate, msgMessage) => {
   } catch (error) {
     console.log('Error writing message:', JSON.stringify(error, null, 2))
   }
-}
-
-export const messages = {
-  listMessages,
-  writeMessage
 }

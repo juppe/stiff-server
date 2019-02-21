@@ -1,10 +1,9 @@
-import Redis from 'ioredis'
+import { connectRedis } from './redis'
 
-const redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379'
-const redis = new Redis(redis_address)
+const redis = connectRedis()
 
 // List all rooms
-const listRooms = async () => {
+export const listRooms = async () => {
   try {
     const data = await redis.hgetall('stiff:rooms')
     const rooms = Object.keys(data).map(key => JSON.parse(data[key]))
@@ -15,7 +14,7 @@ const listRooms = async () => {
 }
 
 // Create new room
-const createRoom = async name => {
+export const createRoom = async name => {
   const roomName = JSON.stringify(name)
   try {
     // Check if room exists
@@ -41,7 +40,7 @@ const createRoom = async name => {
 }
 
 // Join room
-const joinRoom = async (room, username, socketid) => {
+export const joinRoom = async (room, username, socketid) => {
   try {
     const rediskey = 'stiff:members:' + room
     await redis.hset(rediskey, username, socketid)
@@ -54,12 +53,20 @@ const joinRoom = async (room, username, socketid) => {
 }
 
 // Leave room
-const leaveRoom = async () => {
-  /* Not omplemented yet... */
+export const leaveRoom = async (room, username, socketid) => {
+  try {
+    const rediskey = 'stiff:members:' + room
+    await redis.hdel(rediskey, username, socketid)
+  } catch (error) {
+    console.error(
+      'Unable to remove member from room:',
+      JSON.stringify(error, null, 2)
+    )
+  }
 }
 
 // List all room members
-const getRoomMembers = async room => {
+export const getRoomMembers = async room => {
   try {
     const rediskey = 'stiff:members:' + room
     const data = await redis.hgetall(rediskey)
@@ -67,12 +74,4 @@ const getRoomMembers = async room => {
   } catch (error) {
     console.log('Error fetching room members:', JSON.stringify(error, null, 2))
   }
-}
-
-export const rooms = {
-  listRooms,
-  createRoom,
-  joinRoom,
-  leaveRoom,
-  getRoomMembers
 }
