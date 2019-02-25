@@ -1,6 +1,6 @@
 import { createUser, listUsers } from '../actions/users'
-import { loginHandler } from '../actions/login'
 import { connectRedis } from '../actions/redis'
+import { loginHandler } from '../auth/login'
 
 const redis = connectRedis()
 
