@@ -1,4 +1,5 @@
 import { connectRedis } from './redis'
+import { getUser, getUserByUUID } from './users'
 
 const redis = connectRedis()
 
@@ -23,6 +24,7 @@ export const createRoom = async name => {
     if (exists === 1) {
       return { status: 'ERROR', message: 'Room exists' }
     }
+
     // Create room
     const response = await redis.hset('stiff:rooms', roomName, roomName)
 
@@ -42,8 +44,10 @@ export const createRoom = async name => {
 // Join room
 export const joinRoom = async (room, username, socketid) => {
   try {
+    // Fetch user info
+    const user = await getUser(username)
     const rediskey = 'stiff:members:' + room
-    await redis.hset(rediskey, username, socketid)
+    await redis.hset(rediskey, user['uuid'], socketid)
   } catch (error) {
     console.error(
       'Unable to add member to room:',
@@ -53,10 +57,12 @@ export const joinRoom = async (room, username, socketid) => {
 }
 
 // Leave room
-export const leaveRoom = async (room, username, socketid) => {
+export const leaveRoom = async (room, username) => {
   try {
+    // Fetch user info
+    const user = await getUser(username)
     const rediskey = 'stiff:members:' + room
-    await redis.hdel(rediskey, username, socketid)
+    await redis.hdel(rediskey, user['uuid'])
   } catch (error) {
     console.error(
       'Unable to remove member from room:',
@@ -70,7 +76,12 @@ export const getRoomMembers = async room => {
   try {
     const rediskey = 'stiff:members:' + room
     const data = await redis.hgetall(rediskey)
-    return data
+    // Fetch users by UUID
+    const users = await Promise.all(
+      Object.keys(data).map(uuid => getUserByUUID(uuid))
+    )
+    const members = users.map(user => user.nickname)
+    return members
   } catch (error) {
     console.log('Error fetching room members:', JSON.stringify(error, null, 2))
   }

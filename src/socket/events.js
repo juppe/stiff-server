@@ -1,5 +1,6 @@
+import * as R from 'ramda'
 import { listMessages } from '../actions/messages'
-import { listRooms, joinRoom } from '../actions/rooms'
+import { listRooms, joinRoom, getRoomMembers } from '../actions/rooms'
 import { listUsers } from '../actions/users'
 import { connectRedis } from '../actions/redis'
 
@@ -10,34 +11,41 @@ redis.subscribe('new_chat', 'new_room', 'new_user')
 export const events = io => {
   // Socket.IO
   io.on('connection', socket => {
-    try {
-      const username = socket.request.session.passport.user
-    } catch (e) {
-      console.log("Not logged in!")
+    // Check if user has a session and is logged in
+    const sessionUser = R.path(['session', 'passport', 'user'], socket.request)
+
+    // Return nothing if user is not logger in
+    if (sessionUser === undefined) {
+      console.log('Not logged in!')
       return
     }
 
     // Join room and send all messages in room
     socket.on('join_room', async room => {
       socket.join(room)
-      const username = socket.request.session.passport.user
-      await joinRoom(room, username, socket.id)
+      await joinRoom(room, sessionUser, socket.id)
 
       // Send messages history when joining room
       const messages = await listMessages(room)
-      socket.emit('list_messages', messages)
+      socket.emit('messages_list', messages)
+    })
+
+    // List all members/users in room
+    socket.on('room_members', async room => {
+      const members = await getRoomMembers(room)
+      socket.emit('members_list', members)
     })
 
     // List all rooms
     socket.on('list_rooms', async () => {
       const rooms = await listRooms()
-      socket.emit('list_rooms', rooms)
+      socket.emit('rooms_list', rooms)
     })
 
     // List all users
     socket.on('list_users', async () => {
       const users = await listUsers()
-      socket.emit('list_users', users)
+      socket.emit('users_list', users)
     })
 
     // Disconnect
